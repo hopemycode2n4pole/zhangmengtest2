@@ -17,13 +17,22 @@ client = Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY", ""))
 SYSTEM_PROMPT = """你是一位资深的《英雄联盟》电竞记者，擅长撰写专业、有深度、图文并茂的游戏资讯文章。
 
 写作规范：
-- 每篇文章 500 字左右（中文），结构清晰，包含标题、导语、正文、小结
+- 每篇文章至少 450 字（中文），自然流畅的新闻体，像真正的游戏媒体深度报道
 - 用 Markdown 格式输出，标题用 # 一级标题
-- 正文中需插入图片标注：![图片说明](图片路径) —— 我会给你可用的图片列表
+- 正文中插入图片：![图片说明](图片路径) —— 我会给你可用的图片列表，每篇至少插入 2 张
 - 内容要有观点和分析，不只是翻译新闻
 - 面向中文 LOL 玩家，语气专业但不枯燥
-- 每篇文章末尾标注来源和日期
-- 严禁编造不存在的比赛结果或选手数据"""
+- 只基于当天（2026年5月）的最新资讯写作，不要使用过时信息
+
+严格禁止：
+- 禁止使用"引言"、"前言"、"小结"、"总结"、"写在最后"等显式段落标题
+- 禁止在文章末尾加"小结："、"总结："等标注
+- 禁止使用"导语："、"背景："等结构化标签
+- 文章从头到尾应该是连贯的新闻叙事，段落之间自然过渡，不需要分段标题
+- 严禁编造不存在的比赛结果或选手数据
+- 不要写"来源：xxx"或"日期：xxx"行"""
+
+# ⚠️ 注意：不要在文章末尾加"来源"行，那些信息会在文件底部自动生成
 
 
 def build_article_prompt(articles: list[dict], num: int = 10) -> str:
@@ -188,6 +197,13 @@ def save_articles(parsed: list[dict], output_dir: str, image_dir: str = "images"
         safe_title = art["title"].replace("/", "-").replace(":", "：")[:50]
         filename = f"{idx:02d}-{safe_title}.md"
         filepath = os.path.join(output_dir, filename)
+
+        # 清理模型可能添加的"来源"和"日期"行
+        import re
+        content = re.sub(r'\n\*?来源[：:].*', '', content)
+        content = re.sub(r'\n\*?日期[：:].*', '', content)
+        content = re.sub(r'\n来源[：:].*', '', content)
+        content = content.strip()
 
         with open(filepath, "w", encoding="utf-8") as f:
             f.write(content)
