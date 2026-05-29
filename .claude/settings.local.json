@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "Bash(mkdir -p /Users/fengqiuming/Desktop/zhangmengtest2/lol-news-2026-05-29)",
+      "Bash(pip install *)",
+      "Bash(python3 -m pip install -r requirements.txt -q)"
+    ],
+    "additionalDirectories": [
+      "/Users/fengqiuming/Desktop/zhangmengtest2"
+    ]
+  }
+}
